@@ -37,7 +37,7 @@ var importCmd = &cobra.Command{
 			return err
 		}
 
-		existing, err := store.LoadSecrets()
+		existing, err := store.LoadNamespaceSecrets(namespace)
 		if err != nil {
 			return err
 		}
@@ -111,7 +111,7 @@ var importCmd = &cobra.Command{
 			}
 		}
 
-		if err := store.SaveSecrets(merged); err != nil {
+		if err := store.SaveNamespaceSecrets(namespace, merged); err != nil {
 			return err
 		}
 

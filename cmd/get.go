@@ -21,14 +21,14 @@ var getCmd = &cobra.Command{
 			return err
 		}
 
-		secrets, err := store.LoadSecrets()
+		secrets, err := store.LoadNamespaceSecrets(namespace)
 		if err != nil {
 			return err
 		}
 
 		encrypted, ok := secrets[name]
 		if !ok {
-			return fmt.Errorf("secret '%s' not found", name)
+			return fmt.Errorf("secret '%s' not found in namespace '%s'", name, namespace)
 		}
 
 		plaintext, err := crypto.Decrypt(key, encrypted)

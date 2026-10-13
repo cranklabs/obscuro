@@ -11,6 +11,9 @@ obscuro get KEY
 
 Decrypts the secret and prints it to stdout. Exits with a non-zero status if the key doesn't exist.
 
+Use `obscuro get KEY -n production` to read from a [namespace](/docs/namespaces).
+Without `-n`, the key is read from `default`. Secrets never fall back to another namespace.
+
 ## Example
 
 ```sh

@@ -52,12 +52,12 @@ var setCmd = &cobra.Command{
 			return err
 		}
 
-		secrets, err := store.LoadSecrets()
+		secrets, err := store.LoadNamespaceSecrets(namespace)
 		if err != nil {
 			return err
 		}
 		secrets[name] = encrypted
-		if err := store.SaveSecrets(secrets); err != nil {
+		if err := store.SaveNamespaceSecrets(namespace, secrets); err != nil {
 			return err
 		}
 

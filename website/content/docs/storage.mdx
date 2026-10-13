@@ -11,11 +11,13 @@ description: .obscuro/ directory structure and file schemas
 
 Everything is locked down by default:
 
-| Path                    | Mode |
-| ----------------------- | ---- |
-| `.obscuro/`             | 0700 |
-| `.obscuro/config.json`  | 0600 |
-| `.obscuro/secrets.json` | 0600 |
+| Path                              | Mode |
+| --------------------------------- | ---- |
+| `.obscuro/`                       | 0700 |
+| `.obscuro/config.json`            | 0600 |
+| `.obscuro/secrets.json`           | 0600 |
+| `.obscuro/namespaces/`            | 0700 |
+| `.obscuro/namespaces/<name>.json` | 0600 |
 
 ## config.json
 
@@ -40,6 +42,14 @@ Everything is locked down by default:
 
 A flat key-value map. Each value is `base64(12-byte-nonce || AES-256-GCM-ciphertext)`.
 
+This file holds the `default` namespace, including secrets created before
+namespace support. Named namespaces use separate files at
+`.obscuro/namespaces/<name>.json` with the same flat-map format. They share the
+salt, verification token, and master password from `.obscuro/config.json`.
+No migration of existing files is needed. See [Namespaces](/docs/namespaces).
+
 ## Git
 
-Both files are safe to commit. They contain only encrypted data — sharing them publicly is fine as long as your master password is strong.
+The config and all namespace files are safe to commit with a strong master
+password. Secret values are encrypted, but secret names and namespace names are
+public metadata.

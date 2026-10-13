@@ -1,6 +1,6 @@
 ---
 title: obscuro list
-description: List all stored secret key names
+description: List secret key names in the selected namespace
 ---
 
 ## Usage
@@ -9,7 +9,12 @@ description: List all stored secret key names
 obscuro list
 ```
 
-Prints all your secret key names in alphabetical order. Doesn't decrypt anything — just shows the keys.
+Prints secret key names in the selected namespace in alphabetical order. No
+password is required, and values are never decrypted.
+
+Use `obscuro list -n production` to select a [namespace](/docs/namespaces).
+Without `-n`, only the `default` namespace is listed. To list namespace names,
+run `obscuro namespace list`.
 
 ## Example
 

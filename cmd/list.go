@@ -9,14 +9,14 @@ import (
 
 var listCmd = &cobra.Command{
 	Use:          "list",
-	Short:        "List all secret keys",
+	Short:        "List secret keys in the selected namespace",
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !store.IsInitialized() {
 			return fmt.Errorf("not initialized — run 'obscuro init' first")
 		}
 
-		secrets, err := store.LoadSecrets()
+		secrets, err := store.LoadNamespaceSecrets(namespace)
 		if err != nil {
 			return err
 		}

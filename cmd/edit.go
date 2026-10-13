@@ -30,14 +30,14 @@ var editCmd = &cobra.Command{
 			return err
 		}
 
-		secrets, err := store.LoadSecrets()
+		secrets, err := store.LoadNamespaceSecrets(namespace)
 		if err != nil {
 			return err
 		}
 
 		encrypted, ok := secrets[name]
 		if !ok {
-			return fmt.Errorf("secret '%s' not found", name)
+			return fmt.Errorf("secret '%s' not found in namespace '%s'", name, namespace)
 		}
 
 		plaintext, err := crypto.Decrypt(key, encrypted)
@@ -128,7 +128,7 @@ var editCmd = &cobra.Command{
 		}
 
 		secrets[name] = newEncrypted
-		if err := store.SaveSecrets(secrets); err != nil {
+		if err := store.SaveNamespaceSecrets(namespace, secrets); err != nil {
 			return err
 		}
 

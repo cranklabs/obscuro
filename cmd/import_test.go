@@ -77,6 +77,40 @@ func resetImportFlags() {
 	onConflict = "fail"
 }
 
+func TestImportNamespaceConflictsAreScoped(t *testing.T) {
+	setup(t)
+	initVault(t)
+	if _, _, err := execCmd(t, "set", "API_KEY", "--value", "default-value", "--password", testPassword); err != nil {
+		t.Fatal(err)
+	}
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	origStdin := os.Stdin
+	os.Stdin = r
+	t.Cleanup(func() {
+		os.Stdin = origStdin
+		r.Close()
+		w.Close()
+	})
+	path := writeEnvFile(t, "API_KEY=imported-value\nNEW_KEY=new-value\n")
+	// The matching default key must not cause a conflict in production.
+	_, stderr, err := execCmd(t, "import", path, "-n", "production", "--password", testPassword, "--on-conflict", "fail")
+	if err != nil || !strings.Contains(stderr, "2 added, 0 overwritten, 0 skipped") {
+		t.Fatalf("initial namespaced import: %v, %s", err, stderr)
+	}
+	if _, _, err := execCmd(t, "import", path, "-n", "production", "--password", testPassword, "--on-conflict", "fail"); err == nil {
+		t.Fatal("expected conflicts within production")
+	}
+	for ns, want := range map[string]string{"default": "default-value", "production": "imported-value"} {
+		out, _, err := execCmd(t, "get", "API_KEY", "-n", ns, "--password", testPassword)
+		if err != nil || out != want {
+			t.Fatalf("get in %s = %q, %v; want %q", ns, out, err, want)
+		}
+	}
+}
+
 // (a) --------------------------------------------------------------------
 
 func TestImport_NoConflicts_TUIAddsAll(t *testing.T) {

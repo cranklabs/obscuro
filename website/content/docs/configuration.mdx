@@ -7,10 +7,15 @@ description: Password resolution, environment variables, and global flags
 
 These flags work with any command:
 
-| Flag              | What it does                                  |
-| ----------------- | --------------------------------------------- |
-| `-p, --password`  | Pass the master password inline               |
-| `--password-file` | Read password from a file (use `-` for stdin) |
+| Flag              | What it does                                     |
+| ----------------- | ------------------------------------------------ |
+| `-p, --password`  | Pass the master password inline                  |
+| `--password-file` | Read password from a file (use `-` for stdin)    |
+| `-n, --namespace` | Select the secret namespace (default: `default`) |
+
+Namespace selection applies to `set`, `get`, `edit`, `remove`, `list`, `import`,
+and `inject`. All namespaces share one master password; `init` and `auth` remain
+vault-wide. See [Namespaces](/docs/namespaces) for examples and storage details.
 
 ## Password Resolution Order
 

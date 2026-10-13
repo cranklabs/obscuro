@@ -9,6 +9,10 @@ description: Encrypt and store a secret
 obscuro set KEY [flags]
 ```
 
+Use `obscuro set KEY -n production` to write to a [namespace](/docs/namespaces).
+Named namespaces are created automatically on first write. Without `-n`, secrets
+are stored in `default`.
+
 ## Flags
 
 | Flag           | What it does                               |

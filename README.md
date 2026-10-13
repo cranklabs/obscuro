@@ -64,6 +64,50 @@ obscuro list
 
 ## Usage
 
+### Namespaces
+
+Group secrets by environment or application with `--namespace` / `-n`. All
+namespaces share the repository's master password and password-storage backend.
+Without the flag, commands use `default`, which contains your existing secrets.
+No migration or re-initialization is needed.
+
+```bash
+obscuro set API_KEY --namespace production
+obscuro set API_KEY -n staging
+obscuro get API_KEY -n production
+obscuro list -n production
+obscuro import secrets.env -n production --on-conflict=skip
+obscuro namespace list
+```
+
+`set`, `get`, `edit`, `remove` (and `rm`), `list`, `import`, and `inject` operate
+only on the selected namespace. The same key can have different values in each
+namespace. Named namespaces are created on the first successful `set` or `import`;
+reading an absent namespace treats it as empty and does not create files.
+`obscuro namespace list` lists persisted namespaces plus `default`, sorted,
+without requiring a password. Empty namespaces remain listed after their last
+secret is removed.
+
+`inject` never falls back to `default` or another namespace. Use `--strict` to
+fail if a placeholder is missing from the selected namespace:
+
+```bash
+obscuro inject -n production --strict < manifest.yaml
+helm install myrelease ./chart --post-renderer obscuro \
+  --post-renderer-args inject \
+  --post-renderer-args=--namespace=production \
+  --post-renderer-args=--strict
+```
+
+Names must be 1–63 lowercase letters, digits, hyphens, or underscores, starting
+with a letter or digit. Windows-reserved filenames (such as `con`, `nul`, `com1`,
+or `lpt1`) are rejected on all platforms for portability. Selection is per
+invocation; there is no saved active namespace. `init` and `auth` remain vault-wide.
+
+> **Security note:** Namespaces are organizational groups, not access-control
+> boundaries. Anyone with the master password can decrypt every namespace.
+> Namespace names, like secret names, are public repository metadata.
+
 ### `obscuro init`
 
 Creates the `.obscuro/` directory and sets up encryption. Prompts for a master password (with confirmation).
@@ -107,7 +151,7 @@ obscuro rm DB_PASS
 
 ### `obscuro list`
 
-Lists all stored secret names. **No password is required**, by design. `list` is meant for use in scripts, CI, and shell completion.
+Lists stored secret names in the selected namespace. **No password is required**, by design. `list` is meant for use in scripts, CI, and shell completion.
 
 > **Metadata leakage:** Secret *names* are stored as plaintext keys in `.obscuro/secrets.json` and are visible to anyone with read access to the repository, with no password needed. Only the *values* are encrypted. Don't put sensitive information (customer names, internal hostnames, ticket numbers) in secret names. Treat them as public.
 
@@ -221,6 +265,7 @@ obscuro auth status   # Check if keychain has a stored password
 |------|-------|-------|-------------|
 | `--password` | `-p` | All commands | Master password (skips interactive prompt) |
 | `--password-file` | | All commands | Read master password from file (use `-` for stdin) |
+| `--namespace` | `-n` | Secret commands | Select a secret namespace (default: `default`) |
 | `--value` | | `set` only | Secret value (skips interactive prompt) |
 | `--value-file` | | `set` only | Read secret value from file (use `-` for stdin) |
 
@@ -269,10 +314,11 @@ helm install myrelease ./chart --post-renderer obscuro --post-renderer-args inje
 
 ## What gets committed
 
-Both files in `.obscuro/` are safe to commit:
+The vault files in `.obscuro/` are safe to commit:
 
 - **`config.json`** — Argon2id salt and a verification token. The salt is not secret.
-- **`secrets.json`** — All values are AES-256-GCM encrypted with random nonces.
+- **`secrets.json`** — The default namespace; all values are AES-256-GCM encrypted with random nonces.
+- **`namespaces/<name>.json`** — Named namespaces, using the same encrypted flat-map format and master password.
 
 ## How it works
 

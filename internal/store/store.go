@@ -161,12 +161,12 @@ func (c *Config) DecodeSalt() ([]byte, error) {
 	return base64.StdEncoding.DecodeString(c.Salt)
 }
 
-// LoadSecrets reads the secrets file into a map.
+// LoadSecrets reads the default namespace's secrets file into a map.
 func LoadSecrets() (map[string]string, error) {
-	p, err := secretsPath()
-	if err != nil {
-		return nil, err
-	}
+	return LoadNamespaceSecrets(DefaultNamespace)
+}
+
+func loadSecrets(p string) (map[string]string, error) {
 	data, err := os.ReadFile(p)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -178,16 +178,15 @@ func LoadSecrets() (map[string]string, error) {
 	if err := json.Unmarshal(data, &secrets); err != nil {
 		return nil, fmt.Errorf("parsing secrets: %w", err)
 	}
+	if secrets == nil {
+		secrets = map[string]string{}
+	}
 	return secrets, nil
 }
 
-// SaveSecrets writes the secrets map to disk.
+// SaveSecrets writes the default namespace's secrets map to disk.
 func SaveSecrets(secrets map[string]string) error {
-	p, err := secretsPath()
-	if err != nil {
-		return err
-	}
-	return writeJSON(p, secrets)
+	return SaveNamespaceSecrets(DefaultNamespace, secrets)
 }
 
 // ListKeys returns sorted secret key names.
@@ -200,17 +199,10 @@ func ListKeys(secrets map[string]string) []string {
 	return keys
 }
 
-// DeleteSecret removes a secret by key. Returns an error if the key does not exist.
+// DeleteSecret removes a secret from the default namespace by key.
+// It returns an error if the key does not exist.
 func DeleteSecret(name string) error {
-	secrets, err := LoadSecrets()
-	if err != nil {
-		return err
-	}
-	if _, ok := secrets[name]; !ok {
-		return fmt.Errorf("secret '%s' not found", name)
-	}
-	delete(secrets, name)
-	return SaveSecrets(secrets)
+	return DeleteNamespaceSecret(DefaultNamespace, name)
 }
 
 func writeJSON(path string, v interface{}) error {

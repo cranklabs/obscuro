@@ -10,7 +10,10 @@ obscuro remove KEY
 obscuro rm KEY
 ```
 
-Deletes a secret from `.obscuro/secrets.json`. You can also use the `rm` alias.
+Deletes a secret from the selected namespace. You can also use the `rm` alias.
+
+Use `obscuro remove KEY -n production` to remove a secret from a
+[namespace](/docs/namespaces). Without `-n`, only `default` is affected.
 
 ## Example
 

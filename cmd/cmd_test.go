@@ -40,6 +40,7 @@ func setup(t *testing.T) {
 	store.ResetRoot()
 	password = ""
 	passwordFile = ""
+	namespace = store.DefaultNamespace
 	secretValue = ""
 	onConflict = ""
 	injectStrict = false
@@ -60,6 +61,8 @@ func setup(t *testing.T) {
 
 func execCmd(t *testing.T, args ...string) (string, string, error) {
 	t.Helper()
+	// Each invocation represents a fresh CLI process for namespace selection.
+	namespace = store.DefaultNamespace
 	rootCmd.SetArgs(args)
 
 	var stdout, cobraStderr, osStderrBuf bytes.Buffer

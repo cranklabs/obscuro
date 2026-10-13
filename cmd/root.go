@@ -21,6 +21,7 @@ import (
 
 var password string
 var passwordFile string
+var namespace string
 
 // Stdout is the writer for command output (payload data).
 // Tests can override this to capture output.
@@ -52,21 +53,25 @@ var rootCmd = &cobra.Command{
 	Short: "Safely store encrypted secrets in your repository",
 	Long: `Encrypt secrets and store them safely in your git repo.
 Use 'obscuro inject' as a Helm post-renderer to replace __KEY__ placeholders at deploy time.
+Select secret groups with --namespace/-n (default: default); all share one master password.
 
 Secrets are encrypted with Argon2id key derivation and AES-256-GCM.`,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if err := store.ValidateNamespace(namespace); err != nil {
+			return err
+		}
 		// Skip for commands that already handle versioning.
 		name := cmd.Name()
 		if name == "upgrade" || name == "version" {
-			return
+			return nil
 		}
 
 		// Skip if opted out or running a dev build.
 		if os.Getenv("OBSCURO_NO_UPDATE_CHECK") == "1" {
-			return
+			return nil
 		}
 		if version.Version == "dev" {
-			return
+			return nil
 		}
 
 		updateCh = make(chan updateResult, 1)
@@ -74,6 +79,7 @@ Secrets are encrypted with Argon2id key derivation and AES-256-GCM.`,
 			latest, err := fetchLatestTag()
 			updateCh <- updateResult{latest: latest, err: err}
 		}()
+		return nil
 	},
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {
 		if updateCh == nil {
@@ -97,6 +103,7 @@ Secrets are encrypted with Argon2id key derivation and AES-256-GCM.`,
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&password, "password", "p", "", "master password (avoids interactive prompt; visible in process list)")
 	rootCmd.PersistentFlags().StringVar(&passwordFile, "password-file", "", "read master password from file (or - for stdin)")
+	rootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", store.DefaultNamespace, "secret namespace (all namespaces share the master password)")
 }
 
 // Execute runs the root command.

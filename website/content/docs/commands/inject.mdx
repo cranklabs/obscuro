@@ -11,6 +11,15 @@ obscuro inject < input.yaml > output.yaml
 
 Reads stdin, finds every `__KEY__` pattern, replaces it with the decrypted secret, and writes the result to stdout. This works with any text-based file — YAML manifests, `.env` files, config files, whatever.
 
+Use `--namespace` / `-n` to select a [namespace](/docs/namespaces). Only that
+namespace is used; there is no fallback to `default` or another namespace.
+Missing placeholders remain unchanged with a warning unless `--strict` is set,
+in which case the command fails without emitting output.
+
+```sh
+obscuro inject -n production --strict < input.yaml
+```
+
 ## Deployment Guides
 
 Obscuro works with any deployment tool. Check out the guides for your setup:

@@ -20,7 +20,7 @@ var removeCmd = &cobra.Command{
 			return err
 		}
 
-		if err := store.DeleteSecret(name); err != nil {
+		if err := store.DeleteNamespaceSecret(namespace, name); err != nil {
 			return err
 		}
 

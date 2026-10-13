@@ -1,0 +1,81 @@
+---
+title: Namespaces
+description: Group secrets by environment or application while sharing one master password
+---
+
+Namespaces keep separate sets of secrets in the same repository vault. Use them
+for environments such as `production` and `staging`, or for different applications.
+Every namespace shares the vault's master password and password-storage backend.
+
+## Select a Namespace
+
+Pass `--namespace` (or `-n`) to any secret command:
+
+```sh
+obscuro set API_KEY --namespace production
+obscuro set API_KEY -n staging
+obscuro get API_KEY -n production
+obscuro edit API_KEY -n production
+obscuro list -n production
+obscuro remove API_KEY -n staging
+obscuro import secrets.env -n production --on-conflict=skip
+```
+
+Without this flag, commands use `default`. Existing secrets are already in the
+default namespace; no migration or re-initialization is required. Selection is
+per invocation, not a saved active namespace.
+
+Named namespaces are created automatically on the first successful `set` or
+`import`. Reading a namespace that does not exist treats it as empty and creates
+no files. Removing its last secret leaves an empty namespace. `init` and `auth`
+continue to operate on the entire vault.
+
+## List Namespaces
+
+```sh
+obscuro namespace list
+# default
+# production
+# staging
+```
+
+This lists persisted namespaces plus `default`, in sorted order. No password is
+required. `obscuro namespaces list` is an alias.
+
+## Inject from One Namespace
+
+The same `__KEY__` placeholder can resolve to different values depending on the
+namespace. Secrets never fall back to `default` or another namespace.
+
+```sh
+obscuro inject -n production --strict < manifest.yaml
+```
+
+Without `--strict`, missing placeholders are left unchanged with a warning. In
+strict mode, a missing placeholder fails the command without emitting output.
+
+For Helm, pass the namespace as a post-renderer argument:
+
+```sh
+helm install myrelease ./chart --post-renderer obscuro \
+  --post-renderer-args inject \
+  --post-renderer-args=--namespace=production \
+  --post-renderer-args=--strict
+```
+
+## Names and Storage
+
+Names must contain 1–63 lowercase letters, digits, hyphens, or underscores and
+start with a letter or digit. Windows-reserved filenames such as `con`, `nul`,
+`com1`, and `lpt1` are rejected on every platform for portability.
+
+The default namespace stays in `.obscuro/secrets.json`. Each named namespace is
+stored in `.obscuro/namespaces/<name>.json`, using the same encrypted flat-map
+format. All paths resolve from the git repository root, even from a subdirectory.
+Commit these encrypted files along with `.obscuro/config.json`.
+
+<Callout type="warn">
+  Namespaces are organizational groups, not access-control boundaries. Anyone
+  with the master password can decrypt all namespaces. Namespace names and
+  secret names are public metadata; only secret values are encrypted.
+</Callout>

@@ -21,7 +21,8 @@ var injectCmd = &cobra.Command{
 	Use:   "inject",
 	Short: "Replace __KEY__ placeholders in stdin with decrypted secrets",
 	Long: `Reads stdin, replaces all __KEY__ placeholders with their decrypted
-secret values, and writes the result to stdout.
+secret values from the selected namespace, and writes the result to stdout.
+Use --namespace/-n to select a namespace; secrets never fall back to another namespace.
 
 Designed for use as a Helm post-renderer:
   helm install myrelease ./chart --post-renderer obscuro --post-renderer-args inject
@@ -48,7 +49,7 @@ be resolved; in strict mode no output is written to stdout on failure.`,
 			return err
 		}
 
-		secrets, err := store.LoadSecrets()
+		secrets, err := store.LoadNamespaceSecrets(namespace)
 		if err != nil {
 			return err
 		}
