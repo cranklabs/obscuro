@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Obscuro website
 
-## Getting Started
+Next.js and Fumadocs documentation site, statically exported to GitHub Pages.
 
-First, run the development server:
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install --frozen-lockfile
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://localhost:3000>. Documentation lives in `content/docs/` and the
+application lives in `src/app/`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build and preview
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm lint
+pnpm format:check
+pnpm preview
+```
 
-## Learn More
+`pnpm build` exports the site to `out/`. `pnpm start` serves an existing export.
+Search indexes are generated at build time and queried in the browser; no
+application server or deployment secrets are needed.
 
-To learn more about Next.js, take a look at the following resources:
+## GitHub Pages deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+In the repository's **Settings → Pages**, select **GitHub Actions** as the build
+and deployment source. The `.github/workflows/website.yml` workflow checks and
+builds website changes, then deploys `out/` on `main`. It can also be run manually
+from the Actions tab.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The site is hosted at <https://cranklabs.github.io/obscuro/>. The workflow gets the
+base path and site URL from `actions/configure-pages`, so asset paths and search
+requests work under the repository subpath. Next.js links automatically use the
+same base path.
 
-## Deploy on Vercel
+To reproduce the GitHub Pages build locally:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+NEXT_PUBLIC_BASE_PATH=/obscuro SITE_URL=https://cranklabs.github.io/obscuro/ pnpm build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The base path is fixed at build time. Use `pnpm preview` without these environment
+variables to preview at the local server root.

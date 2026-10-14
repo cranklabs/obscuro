@@ -5,11 +5,22 @@ on:
     paths:
       - "website/**"
       - ".github/workflows/website.yml"
+  pull_request:
+    paths:
+      - "website/**"
+      - ".github/workflows/website.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   check:
-    name: Lint & Format
+    name: Lint, Format & Build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
     defaults:
       run:
         working-directory: website
@@ -32,39 +43,38 @@ jobs:
 
       - run: pnpm format:check
 
+      - name: Configure GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Build static site
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          SITE_URL: ${{ steps.pages.outputs.base_url }}
+
+      - name: Upload GitHub Pages artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: website/out
+
   deploy:
-    name: Deploy to Cloudflare
+    name: Deploy to GitHub Pages
     needs: check
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
-    defaults:
-      run:
-        working-directory: website
+      pages: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          package_json_file: website/package.json
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: website/pnpm-lock.yaml
-
-      - run: pnpm install --frozen-lockfile
-
-      - uses: Infisical/secrets-action@v1.0.16
-        with:
-          method: oidc
-          domain: ${{ secrets.INFISICAL_API_URL }}
-          identity-id: ${{ secrets.INFISICAL_IDENTITY_ID }}
-          project-slug: ${{ secrets.INFISICAL_PROJECT_SLUG }}
-          env-slug: ci
-          secret-path: /
-
-      - run: pnpm run deploy
+      - name: Deploy static site
+        id: deployment
+        uses: actions/deploy-pages@v4

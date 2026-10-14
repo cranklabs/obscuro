@@ -695,7 +695,7 @@ func TestAuthDoctor_KeychainUnavailable_NoPrompt(t *testing.T) {
 	if !strings.Contains(stdout, "OBSCURO_PASSWORD") {
 		t.Errorf("stdout %q does not contain OBSCURO_PASSWORD alternative", stdout)
 	}
-	if !strings.Contains(stdout, "https://obscuro.dev/docs/troubleshooting") {
+	if !strings.Contains(stdout, "https://cranklabs.github.io/obscuro/docs/troubleshooting/") {
 		t.Errorf("stdout %q does not contain docs URL", stdout)
 	}
 	if !strings.Contains(stdout, "dbus down") {
@@ -829,7 +829,7 @@ func TestAuthDoctor_KeychainUnavailable_Fedora(t *testing.T) {
 	if !strings.Contains(stdout, "sudo dnf install gnome-keyring") {
 		t.Errorf("stdout %q does not contain Fedora install command", stdout)
 	}
-	if !strings.Contains(stdout, "https://obscuro.dev/docs/troubleshooting") {
+	if !strings.Contains(stdout, "https://cranklabs.github.io/obscuro/docs/troubleshooting/") {
 		t.Errorf("stdout %q does not contain docs URL", stdout)
 	}
 }

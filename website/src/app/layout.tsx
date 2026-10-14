@@ -52,7 +52,9 @@ export const metadata: Metadata = {
   title: "Obscuro - Encrypt secrets. Commit safely. Deploy anywhere.",
   description:
     "Encrypt secrets and commit them safely to git. Obscuro handles encryption and injects secrets at deploy time — works with Helm, Docker Compose, and Kubernetes.",
-  metadataBase: new URL("https://obscuro.dev"),
+  metadataBase: new URL(
+    process.env.SITE_URL || "https://cranklabs.github.io/obscuro/",
+  ),
 }
 
 export default function RootLayout({
@@ -75,6 +77,12 @@ export default function RootLayout({
     >
       <body className="noise-bg scanlines bg-background text-foreground min-h-screen antialiased">
         <RootProvider
+          search={{
+            options: {
+              type: "static",
+              api: `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/api/search.json`,
+            },
+          }}
           theme={{
             enabled: false,
           }}

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-const docsURL = "https://obscuro.dev/docs/troubleshooting"
+const docsURL = "https://cranklabs.github.io/obscuro/docs/troubleshooting/"
 
 // Remediation holds a structured keychain-unavailable message.
 type Remediation struct {
