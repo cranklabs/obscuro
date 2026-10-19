@@ -136,6 +136,12 @@ func TestInvalidNamespaceRejectedBeforeInputOrAuthentication(t *testing.T) {
 			}
 		}
 	}
+	for _, ns := range []string{"", "../escape", "Production"} {
+		_, _, err := execCmd(t, "run", "--namespace", ns, "--", "unused-command")
+		if err == nil || !strings.Contains(err.Error(), "invalid namespace") {
+			t.Errorf("run with namespace %q: %v", ns, err)
+		}
+	}
 }
 
 func TestNamespaceWrongPasswordDoesNotWrite(t *testing.T) {

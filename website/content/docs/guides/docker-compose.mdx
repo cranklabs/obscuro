@@ -1,9 +1,11 @@
 ---
 title: Docker Compose
-description: Use Obscuro to inject secrets into Docker Compose projects
+description: Load secrets into Docker Compose through environment variables or templates
 ---
 
-Obscuro's `inject` command reads stdin, replaces `__KEY__` placeholders with decrypted secrets, and writes to stdout. That makes it a natural fit for Docker Compose — you keep a template file with placeholders and inject real values right before you run `docker compose up`.
+Use `obscuro run` to pass secrets to Compose as environment variables, without a
+plaintext `.env` file. Use `inject` instead when you need to replace `__KEY__`
+placeholders in template files.
 
 ## Setup
 
@@ -14,6 +16,30 @@ obscuro init
 obscuro set DB_PASSWORD --value "s3cret"
 obscuro set API_KEY --value "key-12345"
 ```
+
+## Running with Environment Variables
+
+Reference environment variables in `compose.yaml`:
+
+```yaml
+services:
+  app:
+    image: myapp:latest
+    environment:
+      API_KEY: ${API_KEY:?API_KEY is required}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+```
+
+Run Compose with secrets from the default namespace:
+
+```sh
+obscuro run -- docker compose up -d
+```
+
+For a named namespace, store the secrets with the same `-n` flag, then run
+`obscuro run -n my-app -- docker compose up -d`. Secret values override matching
+variables in your environment. Compose passes them into containers only where
+your Compose configuration references them.
 
 ## Injecting into docker-compose.yml
 

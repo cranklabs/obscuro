@@ -19,6 +19,7 @@ obscuro edit API_KEY -n production
 obscuro list -n production
 obscuro remove API_KEY -n staging
 obscuro import secrets.env -n production --on-conflict=skip
+obscuro run -n production -- docker compose up -d
 ```
 
 Without this flag, commands use `default`. Existing secrets are already in the
@@ -62,6 +63,16 @@ helm install myrelease ./chart --post-renderer obscuro \
   --post-renderer-args=--namespace=production \
   --post-renderer-args=--strict
 ```
+
+## Run a Command with Namespace Secrets
+
+```sh
+obscuro run -n my-app -- docker compose up -d
+```
+
+Loads only `my-app` secrets into the command's environment, overriding matching
+inherited variables. Your shell is unchanged. See [`obscuro run`](/docs/commands/run)
+for process behavior and a Compose example.
 
 ## Names and Storage
 

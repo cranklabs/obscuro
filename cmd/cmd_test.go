@@ -934,6 +934,7 @@ func TestUpgradeFailsWhenChecksumUnavailable(t *testing.T) {
 
 func TestUpgradeSkipChecksumOptOut(t *testing.T) {
 	setup(t)
+	stubReplaceBinaryNoop(t)
 	srv := newUpgradeTestServer(t, false)
 	defer srv.Close()
 
@@ -1010,6 +1011,7 @@ func TestUpgradeRequireSignatureFailsWhenSigMissing(t *testing.T) {
 
 func TestUpgradeOpportunisticTolerantWhenSigMissing(t *testing.T) {
 	setup(t)
+	stubReplaceBinaryNoop(t)
 	srv := newUpgradeSigTestServer(t, false)
 	defer srv.Close()
 

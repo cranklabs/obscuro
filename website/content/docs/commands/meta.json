@@ -8,6 +8,7 @@
     "remove",
     "edit",
     "inject",
+    "run",
     "auth",
     "upgrade",
     "version"

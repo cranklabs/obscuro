@@ -1,0 +1,58 @@
+---
+title: obscuro run
+description: Run a command with namespace secrets as environment variables
+---
+
+## Usage
+
+```sh
+obscuro run -n <namespace> -- <command> [args...]
+```
+
+Decrypts all secrets in the selected namespace and adds them to the command's
+environment. Secret values override matching inherited variables. Your shell's
+environment is unchanged.
+
+Without `-n`, only `default` is loaded. There is no fallback to other namespaces.
+An empty or absent namespace adds no variables.
+
+## Docker Compose
+
+```sh
+obscuro set DB_PASSWORD -n my-app
+obscuro run -n my-app -- docker compose up -d
+```
+
+Reference the variable in `compose.yaml`:
+
+```yaml
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+```
+
+No plaintext `.env` file is needed. Unlike `inject`, `run` does not replace
+`__KEY__` placeholders; Compose reads the environment and resolves `${VAR}`.
+
+## Process Behavior
+
+- Put Obscuro flags before `--`; arguments after it belong to the child command.
+- The command runs in your current directory with stdin, stdout, and stderr
+  connected. Obscuro returns the child's exit code.
+- No shell is started implicitly. For shell syntax, invoke one explicitly:
+
+  ```sh
+  obscuro run -- sh -c './build.sh && ./deploy.sh'
+  ```
+
+- All secrets must decrypt successfully before the command starts. Environment
+  names cannot be empty or contain `=` or NUL; values cannot contain NUL.
+
+<Callout type="warn">
+  Run only trusted commands. The child and its descendants can read, log, or
+  persist these environment variables. Obscuro itself does not write decrypted
+  values to disk. Existing environment variables, including an exported
+  `OBSCURO_PASSWORD`, are inherited too.
+</Callout>

@@ -40,7 +40,8 @@ var updateCh chan updateResult
 
 // exitErr is a sentinel error type that carries an explicit OS exit code.
 // Cobra returns 1 by default; exitErr lets auth store signal 2 (non-TTY/cancelled)
-// and 3 (explicit --backend flag but backend unavailable).
+// and 3 (explicit --backend flag but backend unavailable), and run preserve a
+// child command's exit status.
 type exitErr struct {
 	code int
 	msg  string
@@ -53,6 +54,7 @@ var rootCmd = &cobra.Command{
 	Short: "Safely store encrypted secrets in your repository",
 	Long: `Encrypt secrets and store them safely in your git repo.
 Use 'obscuro inject' as a Helm post-renderer to replace __KEY__ placeholders at deploy time.
+Use 'obscuro run -- COMMAND' to run a command with secrets in its environment.
 Select secret groups with --namespace/-n (default: default); all share one master password.
 
 Secrets are encrypted with Argon2id key derivation and AES-256-GCM.`,

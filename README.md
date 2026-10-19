@@ -80,7 +80,7 @@ obscuro import secrets.env -n production --on-conflict=skip
 obscuro namespace list
 ```
 
-`set`, `get`, `edit`, `remove` (and `rm`), `list`, `import`, and `inject` operate
+`set`, `get`, `edit`, `remove` (and `rm`), `list`, `import`, `inject`, and `run` operate
 only on the selected namespace. The same key can have different values in each
 namespace. Named namespaces are created on the first successful `set` or `import`;
 reading an absent namespace treats it as empty and does not create files.
@@ -170,6 +170,31 @@ By default, placeholders that don't match a stored secret are left in place and 
 obscuro inject --strict < manifest.yaml > rendered.yaml
 OBSCURO_INJECT_STRICT=1 helm install myrelease ./chart --post-renderer obscuro --post-renderer-args inject
 ```
+
+### `obscuro run [flags] -- COMMAND [args...]`
+
+Runs a command with secrets from the selected namespace loaded as environment
+variables. For example, let Docker Compose read secrets without generating a
+plaintext `.env` file:
+
+```bash
+obscuro set DB_PASSWORD -n my-app
+obscuro run -n my-app -- docker compose up -d
+```
+
+Reference the variable in your Compose file with `${DB_PASSWORD}` or
+`${DB_PASSWORD:?DB_PASSWORD is required}`. Unlike `inject`, `run` does not replace
+`__KEY__` placeholders.
+
+- Secrets override matching variables in the inherited environment, only for the
+  child command and its descendants. Your shell's environment is unchanged.
+- Without `-n`, only `default` is loaded; namespaces never inherit other secrets.
+- The command runs in the current directory with stdin, stdout, stderr, and its
+  exit code passed through. Put Obscuro flags before `--` and child flags after it.
+- No shell is started implicitly. Use `sh -c '...'` explicitly for shell syntax.
+
+Run only trusted commands: they can read, log, or persist their environment.
+Obscuro itself does not write decrypted values to disk.
 
 ### obscuro import
 

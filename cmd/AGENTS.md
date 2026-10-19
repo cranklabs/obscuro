@@ -14,6 +14,7 @@ Cobra command layer. One file per verb. ~1300 LOC, 12 files.
 | edit.go     | `edit KEY`                | Spawns `$EDITOR` on a tempfile, re-encrypts on close                  |
 | remove.go   | `remove KEY`              | Deletes from secrets map                                              |
 | inject.go   | `inject`                  | Reads stdin, replaces `__NAME__` placeholders, writes to `cmd.Stdout` |
+| run.go      | `run -- COMMAND [args...]` | Loads namespace secrets into the child environment; preserves stdio and exit status |
 | auth.go     | `auth store/clear/status` | Manage keychain entry (keyed by base64 salt)                          |
 | upgrade.go  | `upgrade`                 | Self-update from GitHub Releases; verifies sha256, atomic rename      |
 | version.go  | `version`                 | Prints `internal/version.Version`                                     |
