@@ -49,9 +49,9 @@ const iosevka = localFont({
 })
 
 export const metadata: Metadata = {
-  title: "Obscuro - Encrypt secrets. Commit safely. Deploy anywhere.",
+  title: "Obscuro — Encrypted secrets in git",
   description:
-    "Encrypt secrets and commit them safely to git. Obscuro handles encryption and injects secrets at deploy time — works with Helm, Docker Compose, and Kubernetes.",
+    "Encrypt secrets in your repository and inject them into config files at deploy time.",
   metadataBase: new URL(
     process.env.SITE_URL || "https://cranklabs.github.io/obscuro/",
   ),
@@ -75,7 +75,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
-      <body className="noise-bg scanlines bg-background text-foreground min-h-screen antialiased">
+      <body className="bg-background text-foreground min-h-screen antialiased">
         <RootProvider
           search={{
             options: {

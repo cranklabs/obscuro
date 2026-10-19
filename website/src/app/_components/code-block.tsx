@@ -12,12 +12,14 @@ export function CodeBlock({ code, prompt = true, className }: CodeBlockProps) {
   return (
     <div
       className={cn(
-        "border-border bg-card flex max-w-full items-center gap-3 overflow-x-auto rounded-lg border px-4 py-3 font-mono text-xs",
+        "border-border bg-card flex min-w-0 items-start gap-2 rounded-lg border p-3 font-mono text-xs/relaxed",
         className,
       )}
     >
       {prompt && <span className="text-terminal shrink-0 select-none">$</span>}
-      <code className="text-muted-foreground whitespace-nowrap">{code}</code>
+      <pre className="min-w-0 flex-1 overflow-x-auto font-mono">
+        <code className="font-mono">{code}</code>
+      </pre>
       <CopyButton text={code} />
     </div>
   )

@@ -29,7 +29,7 @@ export function CopyButton({ text, className }: CopyButtonProps) {
       <TooltipTrigger
         onClick={handleCopy}
         className={cn(
-          "border-border bg-card hover:border-terminal inline-flex shrink-0 cursor-pointer items-center rounded-sm border p-1.5 transition-all duration-300 hover:shadow-[0_0_12px_rgba(191,90,242,0.15)]",
+          "border-border text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring inline-flex shrink-0 cursor-pointer items-center rounded-sm border p-1.5 transition-colors focus-visible:ring-2 focus-visible:outline-none",
           className,
         )}
         aria-label="Copy to clipboard"

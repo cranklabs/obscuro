@@ -7,7 +7,7 @@ Next.js 16 App Router. One marketing landing page (`page.tsx`) + one docs catch-
 ```
 app/
 ├── layout.tsx                 # Root: loads 4 local font families, sets <html>, wraps fumadocs RootProvider
-├── page.tsx                   # Marketing homepage (hero + waves + features + how-it-works + footer)
+├── page.tsx                   # Static homepage: short intro, install command, three-step example, guide links
 ├── globals.css                # @import "tailwindcss" — sole stylesheet
 ├── favicon.ico
 ├── fonts/                     # 7 .woff2 files (Satoshi, ClashDisplay, ClashGrotesk, IosevkaSS02 ×4 weights)
@@ -24,6 +24,7 @@ app/
 
 ## Conventions
 
+- Keep the homepage concise and static: no decorative animations or repeated marketing sections. Use Client Components only for interactive controls such as copying commands.
 - `_components/` (underscore prefix) is the **only** sanctioned home for non-routing components used by pages here. Shared/cross-route UI goes to `src/components/ui/` (shadcn) instead.
 - Fonts are loaded via `next/font/local` in `layout.tsx` and exposed as CSS variables — reference them from Tailwind classes (`font-sans`, `font-display`, `font-mono`), never via raw `font-family` declarations.
 - The docs route uses Next 16's **double-bracket optional catch-all** `[[...slug]]` — `app/docs` and `app/docs/installation` both resolve here. Do not add `app/docs/page.tsx`; it will conflict.
