@@ -9,6 +9,7 @@ docs/
 ├── meta.json                # Top-level sidebar order (uses "---Label---" separators)
 ├── index.mdx                # / docs root — "Getting Started"
 ├── installation.mdx
+├── agents.mdx               # Agent guide; also served raw at /agents.md — keep it plain Markdown (no JSX)
 ├── configuration.mdx
 ├── security.mdx
 ├── storage.mdx

@@ -19,6 +19,12 @@ export function Nav() {
           className="flex items-center gap-5 text-sm"
         >
           <Link
+            href="/docs/agents"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Agents
+          </Link>
+          <Link
             href="/docs"
             className="text-muted-foreground hover:text-foreground transition-colors"
           >

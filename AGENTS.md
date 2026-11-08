@@ -4,7 +4,7 @@
 
 ## What this is
 
-Go 1.25 CLI (`cobra`) that encrypts secrets (Argon2id + AES-256-GCM) into `.obscuro/secrets.json` at the **git repo root**. Primary use: Helm post-renderer replacing `__KEY__` placeholders via stdin/stdout (`obscuro inject`). Self-upgrades from GitHub Releases. Bundled Next.js docs site lives in `website/`.
+Go 1.25 CLI (`cobra`) that encrypts secrets (Argon2id + AES-256-GCM) into `.obscuro/` at the **git repo root**. Positioned around use by AI coding agents: names are listable without a password, and `obscuro run` / `obscuro inject` hand values to processes or deploy tools without printing them (agent guide: `website/content/docs/agents.mdx`, served at `/docs/agents` and `/agents.md`). `inject` also works as a Helm post-renderer replacing `__KEY__` placeholders via stdin/stdout. Self-upgrades from GitHub Releases. Bundled Next.js docs site lives in `website/`.
 
 ## Structure
 
@@ -31,6 +31,7 @@ website/             → Next.js 16 + fumadocs docs site (its own AGENTS.md appl
 | Add a release asset / target       | `.github/workflows/release.yml` `targets=(...)`    |
 | Modify update-check / self-upgrade | `cmd/upgrade.go` + `cmd/root.go::PersistentPreRun` |
 | Docs content                       | `website/content/docs/*.mdx`                       |
+| Agent-facing guide (`/agents.md`)  | `website/content/docs/agents.mdx`                  |
 
 ## Build
 
