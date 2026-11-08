@@ -1,13 +1,13 @@
 # website/src/app/
 
-Next.js 16 App Router. One marketing landing page (`page.tsx`) + one docs catch-all (`docs/[[...slug]]/page.tsx`) + one static search index route (`api/search.json/route.ts`).
+Next.js 16 App Router. One marketing landing page (`page.tsx`) + one docs catch-all (`docs/[[...slug]]/page.tsx`) + static text routes: search index (`api/search.json/route.ts`), agent guide Markdown (`agents.md/route.ts`), and `llms.txt/route.ts`.
 
 ## Layout
 
 ```
 app/
 ├── layout.tsx                 # Root: loads 4 local font families, sets <html>, wraps fumadocs RootProvider
-├── page.tsx                   # Static homepage: short intro, install command, three-step example, guide links
+├── page.tsx                   # Static homepage: agent-focused intro, install + agent prompt, three-step example, agent reasons, guide links
 ├── globals.css                # @import "tailwindcss" — sole stylesheet
 ├── favicon.ico
 ├── fonts/                     # 7 .woff2 files (Satoshi, ClashDisplay, ClashGrotesk, IosevkaSS02 ×4 weights)
@@ -19,6 +19,8 @@ app/
 ├── docs/
 │   ├── layout.tsx             # fumadocs <DocsLayout> with sidebar from src/lib/source.ts
 │   └── [[...slug]]/page.tsx   # Optional-catch-all → resolves MDX via fumadocs `source.getPage(slug)`
+├── agents.md/route.ts         # Raw Markdown of content/docs/agents.mdx (frontmatter stripped, /docs links absolutized)
+├── llms.txt/route.ts          # llms.txt index pointing at /agents.md and every docs page
 └── api/search.json/route.ts   # fumadocs static Orama index — exports staticGET as GET
 ```
 
@@ -29,6 +31,9 @@ app/
 - Fonts are loaded via `next/font/local` in `layout.tsx` and exposed as CSS variables — reference them from Tailwind classes (`font-sans`, `font-display`, `font-mono`), never via raw `font-family` declarations.
 - The docs route uses Next 16's **double-bracket optional catch-all** `[[...slug]]` — `app/docs` and `app/docs/installation` both resolve here. Do not add `app/docs/page.tsx`; it will conflict.
 - `api/search.json/route.ts` exports the fumadocs `staticGET` handler with `dynamic = "force-static"` for GitHub Pages. RootProvider uses static search against the base-path-prefixed index URL. Customize indexed content via the loader in `src/lib/source.ts`.
+
+- `agents.md/` and `llms.txt/` are route segments whose names include the file extension, so the static export writes `out/agents.md` and `out/llms.txt`. Absolute URLs come from `src/lib/site.ts` (`SITE_URL`).
+- Keep `content/docs/agents.mdx` plain Markdown (no MDX components): `/agents.md` serves its raw source to agents.
 
 ## Anti-patterns
 

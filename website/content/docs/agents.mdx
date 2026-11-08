@@ -1,0 +1,206 @@
+---
+title: Agent Guide
+description: How AI coding agents should use Obscuro to work with secrets without reading them
+---
+
+This page is written for AI coding agents (and the people who set them up). It
+is also published as plain Markdown at
+[`/agents.md`](https://cranklabs.github.io/obscuro/agents.md) so an agent can
+fetch it directly.
+
+## Why Obscuro works well with agents
+
+Obscuro keeps encrypted secrets in the repository, in `.obscuro/` at the git
+root. An agent can do almost everything it needs with secrets without the
+decrypted values ever entering its context window, logs, or transcripts:
+
+- **Discover** which secrets exist with `obscuro list` and
+  `obscuro namespace list`. These print names only and need no password.
+- **Reference** secrets by name in config: `__KEY__` placeholders for
+  `obscuro inject`, or `${KEY}` environment variables for `obscuro run`.
+- **Use** secrets by running commands through `obscuro run`, or by piping
+  templates through `obscuro inject` straight into a deploy tool.
+- **Create** secrets by piping a generator into `obscuro set --value-file -`,
+  so the value goes into the vault and nowhere else.
+- **Review** changes safely. Vault files contain ciphertext and are meant to be
+  committed, so diffs and commits never contain plaintext values.
+
+Every command is non-interactive once a password backend is configured, so it
+works in agent shells that have no terminal.
+
+## Rules for agents
+
+Follow these rules in any repository that uses Obscuro:
+
+1. **Never print decrypted values.** Do not run `obscuro get`, `obscuro edit`,
+   `obscuro run -- env`, `printenv`, or `echo $SECRET`, and do not print
+   `obscuro inject` output, unless the user explicitly asks for that specific
+   value.
+2. **Never write decrypted output into the repository.** Pipe `inject` output
+   directly into the consuming tool, or into a gitignored path the user has
+   approved. Never commit rendered output.
+3. **Never pass secrets as arguments.** Avoid `--password` and `--value`; they
+   are visible in the process list and in your command history. Use
+   `--value-file -` with a pipe instead.
+4. **Never ask the user to paste a secret into chat.** Ask them to run
+   `obscuro set KEY` in their own terminal instead.
+5. **Do not run `obscuro init` in a repository that already has `.obscuro/`**,
+   and do not reinitialize, rotate, or remove secrets without explicit approval.
+6. **Use names, not values.** Discuss, document, and reference secrets only by
+   name and namespace.
+7. **Commit `.obscuro/`** changes along with the config that references them.
+   Secret names and namespace names are plaintext, so keep them non-sensitive.
+
+These rules are a convention, not an enforcement boundary. An agent that can
+run `obscuro run` can also run `obscuro get`. Obscuro makes the safe path easy;
+it does not sandbox an agent with shell access.
+
+## Check the setup
+
+Run these from anywhere inside the repository. All of them are safe to run
+because none of them decrypt anything:
+
+```sh
+obscuro version            # is the CLI installed?
+obscuro namespace list     # which namespaces exist? (always includes default)
+obscuro list -n <name>     # which secret names exist in a namespace?
+obscuro auth status        # is a non-interactive password backend configured?
+```
+
+`obscuro list` prints `No secrets stored.` for an empty or absent namespace.
+Namespaces never fall back to `default` or to each other.
+
+If you see `not initialized — run 'obscuro init' first`, the repository has no
+vault. Ask the user before creating one; see [Human setup](#human-setup).
+
+## Run commands with secrets
+
+Use `obscuro run` when a tool reads configuration from environment variables:
+
+```sh
+obscuro run -n my-app -- docker compose up -d
+obscuro run -n staging -- npm run migrate
+obscuro run -- sh -c './build.sh && ./deploy.sh'
+```
+
+- Every secret in the selected namespace becomes an environment variable for the
+  child process only. Your own shell environment is unchanged.
+- Put Obscuro flags before `--`. No shell is started implicitly; use
+  `sh -c '...'` for pipes or `&&`.
+- The child's exit code is passed through. Treat its output as untrusted for
+  secret leakage: if a command echoes its environment, do not run it this way.
+
+In config files consumed this way, reference variables with the tool's own
+syntax, for example `${DB_PASSWORD:?DB_PASSWORD is required}` in Compose.
+
+## Render templates with secrets
+
+Use `obscuro inject` when a file needs literal values. Write placeholders as
+`__NAME__`: two underscores, an uppercase name (`[A-Z][A-Z0-9_]*`), two
+underscores.
+
+```yaml
+# deploy/app.template.yaml (committed)
+stringData:
+  api-key: __API_KEY__
+```
+
+Pipe the result directly into the tool that needs it, and always use `--strict`
+so a missing secret fails loudly instead of deploying a literal placeholder:
+
+```sh
+obscuro inject -n production --strict < deploy/app.template.yaml | kubectl apply -f -
+helm upgrade --install myapp ./chart --post-renderer obscuro \
+  --post-renderer-args inject \
+  --post-renderer-args=--namespace=production \
+  --post-renderer-args=--strict
+```
+
+`inject` reports injected and unresolved placeholder names on stderr, never
+values. In strict mode it writes nothing to stdout on failure.
+
+## Add, rotate, and migrate secrets
+
+**Generated values** (database passwords, signing keys, tokens you create):
+pipe the generator straight into the vault so the value is never displayed.
+
+```sh
+openssl rand -base64 32 | obscuro set SESSION_SECRET -n my-app --value-file -
+```
+
+**External values** (third-party API keys, credentials the user owns): you do
+not know them and should not ask for them in chat. Ask the user to run this in
+their own terminal:
+
+```sh
+obscuro set STRIPE_API_KEY -n my-app
+```
+
+**Existing plaintext `.env` files**: import them without reading them, then ask
+the user before deleting the plaintext file.
+
+```sh
+obscuro import .env -n my-app --on-conflict=fail
+```
+
+Use `--on-conflict=skip` to keep existing values or `--on-conflict=overwrite` to
+replace them. Without a terminal, the default `fail` refuses to overwrite.
+
+## Troubleshooting
+
+| Error                                                 | Meaning and fix                                                                                                                                    |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cannot open terminal for password prompt`            | No password backend is configured for this machine. Ask the user to run `obscuro auth store` (see below). Do not work around it with `--password`. |
+| `reading secret: cannot open terminal ...` from `set` | `set` had no value source. Pipe a generated value with `--value-file -`, or ask the user to run `obscuro set` themselves.                          |
+| `incorrect password`                                  | The stored or supplied password does not match this vault. Ask the user; never reinitialize.                                                       |
+| `unresolved placeholders: NAME`                       | The selected namespace has no secret `NAME`. Check `obscuro list -n <ns>` and the placeholder spelling, then ask the user to add it.               |
+| `existing keys would be overwritten`                  | `import` hit existing names. Choose `--on-conflict=skip` or `overwrite` deliberately.                                                              |
+| `not initialized — run 'obscuro init' first`          | No vault in this git repository. Ask the user before creating one.                                                                                 |
+
+Set `OBSCURO_NO_UPDATE_CHECK=1` to silence the background update check in
+scripted runs.
+
+## Human setup
+
+A human needs to do this once per repository and machine, because choosing the
+master password is not a task to hand to an agent.
+
+1. [Install Obscuro](/docs/installation).
+2. Create the vault and add secrets in your own terminal:
+
+   ```sh
+   obscuro init
+   obscuro set API_KEY -n my-app
+   ```
+
+3. Store the master password so commands authenticate without a prompt. During
+   `init` you are offered this automatically; otherwise run:
+
+   ```sh
+   obscuro auth store                    # interactive backend picker
+   obscuro auth store --backend keychain # or choose a backend directly
+   ```
+
+   Use `--backend file` on headless machines without an OS keychain. Check the
+   result with `obscuro auth status`.
+
+4. Commit `.obscuro/` and tell your agent how to use it, for example by adding
+   this to your repository's `AGENTS.md`:
+
+   ```md
+   ## Secrets
+
+   Secrets are encrypted with Obscuro in `.obscuro/`. Follow
+   https://cranklabs.github.io/obscuro/agents.md. In short:
+
+   - Discover names with `obscuro namespace list` and `obscuro list -n <ns>`.
+   - Use secrets via `obscuro run -n <ns> -- <cmd>` or
+     `obscuro inject -n <ns> --strict < template | <tool>`.
+   - Create generated secrets with `<generator> | obscuro set KEY -n <ns> --value-file -`.
+   - Never run `obscuro get`/`edit`, print secret values, pass `--password`
+     or `--value`, or commit rendered output. Ask me to set external secrets.
+   ```
+
+In CI, where there is no keychain, provide the password through
+`OBSCURO_PASSWORD` or `--password-file` from your CI secret store. See
+[Configuration](/docs/configuration).

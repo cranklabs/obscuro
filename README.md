@@ -2,7 +2,25 @@
 
 [![CI](https://github.com/janklabs/obscuro/actions/workflows/ci.yml/badge.svg)](https://github.com/janklabs/obscuro/actions/workflows/ci.yml)
 
-Safely store encrypted secrets in your repository. Obscuro encrypts values with a password-derived key (Argon2id + AES-256-GCM) and stores them in `.obscuro/secrets.json`. Secrets are injected into templates by replacing `__KEY__` placeholders via stdin/stdout — designed to work as a Helm post-renderer.
+Encrypted secrets in your repository that AI coding agents can use without reading them. Obscuro encrypts values with a password-derived key (Argon2id + AES-256-GCM) and stores them in `.obscuro/` at the git root. Agents (and people, and CI) can list secret names, run commands with secrets in the environment, and inject them into templates, without the decrypted values passing through their context, logs, or commits.
+
+**Docs:** <https://cranklabs.github.io/obscuro/> · **Agent guide:** <https://cranklabs.github.io/obscuro/docs/agents> ([plain Markdown](https://cranklabs.github.io/obscuro/agents.md))
+
+## Why agents
+
+- **Values stay out of context.** `obscuro list` and `obscuro namespace list` show names without a password. `obscuro run -- CMD` and `obscuro inject` hand secrets directly to a process or deploy tool.
+- **Non-interactive.** With the master password in your OS keychain (or a managed password file), every command works in an agent shell that has no terminal.
+- **Safe to diff and commit.** The vault is ciphertext, so agent commits and code review never contain plaintext.
+- **Generated secrets stay hidden.** `openssl rand -base64 32 | obscuro set SESSION_SECRET --value-file -` stores a new value without displaying it.
+
+You keep the master password and set external secrets yourself; agents work with names. Point your agent at the guide, for example from your repository's `AGENTS.md`:
+
+```md
+Secrets are encrypted with Obscuro in `.obscuro/`. Follow https://cranklabs.github.io/obscuro/agents.md.
+Never run `obscuro get`/`edit`, print secret values, or commit rendered output.
+```
+
+Agent rules are a convention, not a sandbox: an agent that can run `obscuro run` could also run `obscuro get`.
 
 ## Installation
 
@@ -55,11 +73,14 @@ obscuro init
 obscuro set API_KEY
 obscuro set DB_PASS
 
-# Retrieve a secret
-obscuro get API_KEY
-
-# List all secret names
+# List all secret names (no password needed)
 obscuro list
+
+# Run a command with secrets in its environment
+obscuro run -- docker compose up -d
+
+# Retrieve a secret (prints the value; not for agents)
+obscuro get API_KEY
 ```
 
 ## Usage

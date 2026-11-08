@@ -1,11 +1,22 @@
 ---
 title: Getting Started
-description: Encrypt secrets in your git repo with Obscuro
+description: Encrypted secrets in git that your AI agents can use without reading
 ---
 
-Obscuro encrypts your secrets with Argon2id + AES-256-GCM and tucks them into a `.obscuro/` directory at your git repo root. Think of it as a password-protected vault that lives right next to your code.
+Obscuro keeps encrypted secrets in a `.obscuro/` directory at your git repo
+root, so they live and travel with your code. It is built so that AI coding
+agents can work with those secrets without the values ever showing up in their
+context, logs, or commits.
 
-Its core command, `obscuro inject`, reads any text file, replaces `__KEY__` placeholders with decrypted values, and writes the result to stdout. That means it works with **any deployment tool** — Helm, Docker Compose, Kubernetes manifests, Kustomize, or anything else that uses text-based config.
+An agent can list secret names without a password, reference secrets by name in
+config, run commands with secrets in their environment (`obscuro run`), render
+`__KEY__` placeholders straight into a deploy tool (`obscuro inject`), and store
+newly generated secrets without displaying them. You keep the master password;
+once it is in your OS keychain, every command runs non-interactively.
+
+Values are encrypted with Argon2id + AES-256-GCM. The same commands work for
+people, CI, Helm, Docker Compose, Kubernetes, or anything else that reads
+environment variables or text config.
 
 ## Quick Start
 
@@ -21,32 +32,42 @@ Set up a vault in your repo:
 obscuro init
 ```
 
-You'll pick a master password (and optionally save it to your OS keychain so you don't have to type it every time).
+You'll pick a master password and can save it to your OS keychain, so neither
+you nor your agent has to type it again.
 
-Store a secret:
-
-```sh
-obscuro set DB_PASSWORD --value "s3cret"
-```
-
-Read it back:
+Store a secret (you'll be prompted for the value):
 
 ```sh
-obscuro get DB_PASSWORD
+obscuro set DB_PASSWORD
 ```
 
-Use it with Helm (just one option — see guides for Docker Compose and Kubernetes too):
+Run a command with it in the environment:
+
+```sh
+obscuro run -- docker compose up -d
+```
+
+Or inject it into templates, for example as a Helm post-renderer:
 
 ```sh
 helm install myapp ./chart --post-renderer obscuro --post-renderer-args inject
 ```
 
-That's it. Obscuro reads the rendered manifests from stdin, replaces `__KEY__` patterns with decrypted values, and writes clean output to stdout.
+Obscuro reads the rendered manifests from stdin, replaces `__KEY__` patterns
+with decrypted values, and writes the result to stdout.
+
+## Using Obscuro with agents
+
+Point your agent at the [Agent Guide](/docs/agents). It is also published as
+plain Markdown at
+[`/agents.md`](https://cranklabs.github.io/obscuro/agents.md), and the guide
+includes a snippet you can paste into your repository's `AGENTS.md`.
 
 ## Next Steps
 
+- [Agent Guide](/docs/agents) — rules and workflows for AI coding agents
 - [Installation](/docs/installation) — all the ways to install
 - [Commands](/docs/commands/init) — full command reference
-- [Docker Compose Guide](/docs/guides/docker-compose) — inject secrets into Compose projects
+- [Docker Compose Guide](/docs/guides/docker-compose) — load secrets into Compose projects
 - [Kubernetes Guide](/docs/guides/kubernetes) — template raw manifests and Kustomize
 - [Helm Integration](/docs/guides/helm-integration) — post-renderer setup

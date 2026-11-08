@@ -49,9 +49,9 @@ const iosevka = localFont({
 })
 
 export const metadata: Metadata = {
-  title: "Obscuro — Encrypted secrets in git",
+  title: "Obscuro — Encrypted secrets your agents can use without reading",
   description:
-    "Encrypt secrets in your repository and inject them into config files at deploy time.",
+    "Encrypted secrets in git that AI coding agents can list, reference, run, and deploy with, without the values entering their context.",
   metadataBase: new URL(
     process.env.SITE_URL || "https://cranklabs.github.io/obscuro/",
   ),
