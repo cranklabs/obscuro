@@ -57,7 +57,7 @@ Every test calls `t.TempDir()` → `os.Chdir` → `git init` → `store.ResetRoo
 3. `go test ./...`
 4. `actionlint` on `.github/workflows/`
 
-Website is built by a separate workflow. release-please ignores commits that only touch `website/` (`exclude-paths`), so they never bump the CLI version. It cannot exclude a single file, so commits that only change `.github/workflows/website.yml` must use a non-releasing type such as `ci:`.
+Website is built by a separate workflow. release-please ignores commits that only touch `website/` or `.github/workflows/` (`exclude-paths` matches whole directories, so `website.yml` can't be excluded alone), so they never bump the CLI version.
 
 ## Release
 
