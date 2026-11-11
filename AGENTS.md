@@ -15,7 +15,8 @@ internal/crypto/     → Argon2id KDF + AES-256-GCM (see internal/crypto/AGENTS.
 internal/store/      → .obscuro/ I/O + git-repo-root detection (see internal/store/AGENTS.md)
 internal/keychain/   → 28-line wrapper around zalando/go-keyring; key=salt, service="obscuro"
 internal/version/    → 1 var, set at link time via -ldflags (default "dev")
-.github/workflows/   → ci.yml (fmt/build/test) → release.yml (semantic-release + cross-compile) → website.yml
+.github/workflows/   → ci.yml (fmt/build/vet/test/actionlint) · release.yml (release-please + cross-compile + cosign) · website.yml
+release-please-config.json, .release-please-manifest.json → release-please config; manifest holds the current version
 install.sh           → curl|sh installer; downloads release asset, verifies sha256, installs to ~/.local/bin
 website/             → Next.js 16 + fumadocs docs site (its own AGENTS.md applies inside)
 ```
@@ -52,14 +53,15 @@ Every test calls `t.TempDir()` → `os.Chdir` → `git init` → `store.ResetRoo
 ## CI checks (all must pass)
 
 1. `gofmt -l .` — must be empty (run `gofmt -w .` before commit)
-2. `go build ./...`
+2. `go build ./...` and `go vet ./...`
 3. `go test ./...`
+4. `actionlint` on `.github/workflows/`
 
-Website is built by a separate workflow and is excluded from the release path-filter (changes under `website/` do not bump the CLI version).
+Website is built by a separate workflow. release-please ignores commits that only touch `website/` or `.github/workflows/` (`exclude-paths` matches whole directories, so `website.yml` can't be excluded alone), so they never bump the CLI version.
 
 ## Release
 
-`go-semantic-release` on `main` after CI passes. Conventional Commits drive version bumps (`feat:` minor, `fix:` patch, `feat!:` major). Release workflow then cross-compiles 6 targets (linux/darwin/windows × amd64/arm64) with `CGO_ENABLED=0`, generates `checksums.txt`, and uploads to the release. `install.sh` and `cmd/upgrade.go` both depend on this asset naming: `obscuro-${VERSION}-${GOOS}-${GOARCH}[.exe]`.
+[release-please](https://github.com/googleapis/release-please) (`release.yml`, on every push to `main`) keeps one release PR open from Conventional Commits (`feat:` minor, `fix:`/`perf:` patch, `!`/`BREAKING CHANGE` major; `docs:`, `ci:`, `chore:`, `test:`, `refactor:` don't release). Merging a PR to `main` never releases by itself; **merging the release PR** does: it commits `CHANGELOG.md` and `.release-please-manifest.json`, creates the `vX.Y.Z` tag and a **draft** GitHub Release. The workflow then runs the full `ci.yml` (`workflow_call`) on that exact commit, cross-compiles 6 targets (linux/darwin/windows × amd64/arm64, `CGO_ENABLED=0`, `-trimpath`, version via `-ldflags`) from it, writes `checksums.txt`, cosign-signs every file (keyless, identity `release.yml@refs/heads/main`), uploads them, and only then publishes the release and marks it latest. `install.sh` and `cmd/upgrade.go` resolve `releases/latest` and depend on the asset naming `obscuro-${VERSION}-${GOOS}-${GOARCH}[.exe]`. Don't edit `CHANGELOG.md` or the manifest by hand, and don't push tags. No manual trigger exists: recover a failed release with "Re-run failed jobs". Full process: README "Releases".
 
 ## Code map (top symbols)
 

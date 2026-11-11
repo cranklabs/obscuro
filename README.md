@@ -373,3 +373,26 @@ The vault files in `.obscuro/` are safe to commit:
 3. **`get`** / **`inject`** derive the key, verify it, then decrypt.
 
 Identical values produce different ciphertexts each time due to random nonces.
+
+## Releases
+
+Releases are automated with [release-please](https://github.com/googleapis/release-please) in [`.github/workflows/release.yml`](.github/workflows/release.yml). Commits on `main` follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:` releases a minor version, `fix:` and `perf:` a patch, and `feat!:` or a `BREAKING CHANGE:` footer a major version. `docs:`, `ci:`, `chore:`, `test:` and `refactor:` commits don't release, and neither do commits that only change `website/` or `.github/workflows/` (release-please can only exclude whole directories, so all workflows are excluded along with the docs site's).
+
+1. On every push to `main`, release-please opens or updates one release PR (`chore(main): release X.Y.Z`) with the next version in `.release-please-manifest.json` and the generated `CHANGELOG.md`. Because that PR is created by `GITHUB_TOKEN`, the workflow dispatches CI on its branch.
+2. Merging the release PR is the approval to release. release-please creates the `vX.Y.Z` tag and a **draft** GitHub Release.
+3. The full CI suite runs on that exact commit. Only if it passes are the binaries built from the same commit: `obscuro-vX.Y.Z-<os>-<arch>[.exe]` for Linux, macOS and Windows on amd64 and arm64 (`CGO_ENABLED=0`, `-trimpath`, version injected from the tag).
+4. `checksums.txt` (SHA-256) is generated, every file is signed with [cosign](https://github.com/sigstore/cosign) keyless signing (`.sig` and `.pem` next to each file), and everything is uploaded to the draft.
+5. Only then is the release published and marked latest, so `install.sh` and `obscuro upgrade` never see a release without its files.
+
+Don't edit `CHANGELOG.md` or `.release-please-manifest.json` by hand, and don't push tags or create releases manually. If a release run fails, use "Re-run failed jobs" on it; the draft stays hidden until the run succeeds. If a workflow-only change (for example to the build flags in `release.yml`) needs its own release, set `"release-as": "X.Y.Z"` for `.` in `release-please-config.json` in a PR and remove it again after the release.
+
+To verify a downloaded file:
+
+```bash
+cosign verify-blob \
+  --certificate-identity-regexp '^https://github\.com/cranklabs/obscuro/\.github/workflows/release\.yml@refs/heads/main$' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --signature obscuro-vX.Y.Z-linux-amd64.sig \
+  --certificate obscuro-vX.Y.Z-linux-amd64.pem \
+  obscuro-vX.Y.Z-linux-amd64
+```
