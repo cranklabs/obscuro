@@ -15,7 +15,7 @@ export function SectionHeading({
     <h2
       id={id}
       className={cn(
-        "text-muted-foreground mb-8 text-xs font-bold tracking-[0.3em] uppercase",
+        "mb-8 text-xs font-bold tracking-[0.3em] text-muted-foreground uppercase",
         className,
       )}
     >

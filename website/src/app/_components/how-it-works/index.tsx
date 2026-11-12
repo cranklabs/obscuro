@@ -4,6 +4,7 @@ import { ArrowRight, Play } from "lucide-react"
 
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
 import { cn } from "@/lib/utils"
+
 import {
   Connector,
   StepLabel,
@@ -140,7 +141,7 @@ export function HowItWorks() {
 
           {/* Arrow connector (desktop only) */}
           <div className="hidden items-center self-center md:flex">
-            <ArrowRight className="text-terminal/30 size-5" />
+            <ArrowRight className="size-5 text-terminal/30" />
           </div>
           <Connector direction="down" />
 
@@ -196,7 +197,7 @@ export function HowItWorks() {
                 }
               />
             </div>
-            <div className="text-muted-foreground/50 mt-3 flex items-center gap-1.5 text-[11px]">
+            <div className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground/50">
               <Play className="size-3" />
               Secrets injected at runtime — never written to disk
             </div>

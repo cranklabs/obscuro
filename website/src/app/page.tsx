@@ -66,7 +66,7 @@ export default function Home() {
             <br />
             <span className="text-terminal">without reading them.</span>
           </h1>
-          <p className="text-muted-foreground mt-5 max-w-xl text-base/relaxed">
+          <p className="mt-5 max-w-xl text-base/relaxed text-muted-foreground">
             Obscuro keeps encrypted secrets in your repository. AI coding agents
             can discover, reference, and deploy with them while the values stay
             out of their context.
@@ -74,13 +74,13 @@ export default function Home() {
           <div className="mt-6 flex flex-wrap items-center gap-5 text-sm">
             <Link
               href="/docs"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex rounded-md px-4 py-2 font-medium transition-colors"
+              className="inline-flex rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
               Read the docs
             </Link>
             <Link
               href="/docs/agents"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground transition-colors hover:text-foreground"
             >
               Agent guide
             </Link>
@@ -98,7 +98,7 @@ export default function Home() {
         </section>
 
         <section
-          className="border-border border-t py-10 sm:py-12"
+          className="border-t border-border py-10 sm:py-12"
           aria-labelledby="how-it-works-heading"
         >
           <h2 id="how-it-works-heading" className="text-xl font-semibold">
@@ -108,26 +108,26 @@ export default function Home() {
             {steps.map((step, index) => (
               <li key={step.title} className="min-w-0">
                 <h3 className="text-sm font-medium">
-                  <span className="text-muted-foreground mr-2">
+                  <span className="mr-2 text-muted-foreground">
                     {index + 1}.
                   </span>
                   {step.title}
                 </h3>
-                <p className="text-muted-foreground mt-2 mb-3 text-sm/relaxed">
+                <p className="mt-2 mb-3 text-sm/relaxed text-muted-foreground">
                   {step.description}
                 </p>
                 <CodeBlock code={step.code} prompt={false} />
               </li>
             ))}
           </ol>
-          <p className="text-muted-foreground mt-6 text-sm/relaxed">
+          <p className="mt-6 text-sm/relaxed text-muted-foreground">
             Commit the encrypted vault and your templates, never decrypted
             output.
           </p>
         </section>
 
         <section
-          className="border-border border-t py-10 sm:py-12"
+          className="border-t border-border py-10 sm:py-12"
           aria-labelledby="agents-heading"
         >
           <h2 id="agents-heading" className="text-xl font-semibold">
@@ -137,21 +137,21 @@ export default function Home() {
             {reasons.map((reason) => (
               <li key={reason.title}>
                 <h3 className="text-sm font-medium">{reason.title}</h3>
-                <p className="text-muted-foreground mt-2 text-sm/relaxed">
+                <p className="mt-2 text-sm/relaxed text-muted-foreground">
                   {reason.description}
                 </p>
               </li>
             ))}
           </ul>
-          <p className="text-muted-foreground mt-6 text-sm/relaxed">
+          <p className="mt-6 text-sm/relaxed text-muted-foreground">
             Agent rules are a convention, not a sandbox. Read the{" "}
-            <Link href="/docs/agents" className="hover:text-terminal underline">
+            <Link href="/docs/agents" className="underline hover:text-terminal">
               agent guide
             </Link>{" "}
             or give agents the plain{" "}
             <a
               href={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/agents.md`}
-              className="hover:text-terminal underline"
+              className="underline hover:text-terminal"
             >
               agents.md
             </a>
@@ -161,19 +161,19 @@ export default function Home() {
             <span className="text-muted-foreground">Guides</span>
             <Link
               href="/docs/guides/docker-compose"
-              className="hover:text-terminal transition-colors"
+              className="transition-colors hover:text-terminal"
             >
               Docker Compose
             </Link>
             <Link
               href="/docs/guides/kubernetes"
-              className="hover:text-terminal transition-colors"
+              className="transition-colors hover:text-terminal"
             >
               Kubernetes
             </Link>
             <Link
               href="/docs/guides/helm-integration"
-              className="hover:text-terminal transition-colors"
+              className="transition-colors hover:text-terminal"
             >
               Helm
             </Link>

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import { Check, Copy } from "lucide-react"
+import { useState } from "react"
 
 import {
   Tooltip,
@@ -29,15 +29,15 @@ export function CopyButton({ text, className }: CopyButtonProps) {
       <TooltipTrigger
         onClick={handleCopy}
         className={cn(
-          "border-border text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring inline-flex shrink-0 cursor-pointer items-center rounded-sm border p-1.5 transition-colors focus-visible:ring-2 focus-visible:outline-none",
+          "inline-flex shrink-0 cursor-pointer items-center rounded-sm border border-border p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
           className,
         )}
         aria-label="Copy to clipboard"
       >
         {copied ? (
-          <Check className="text-terminal size-3.5" />
+          <Check className="size-3.5 text-terminal" />
         ) : (
-          <Copy className="text-muted-foreground size-3.5" />
+          <Copy className="size-3.5 text-muted-foreground" />
         )}
       </TooltipTrigger>
       <TooltipContent>{copied ? "Copied!" : "Copy"}</TooltipContent>

@@ -1,6 +1,6 @@
+import { RootProvider } from "fumadocs-ui/provider/next"
 import type { Metadata } from "next"
 import localFont from "next/font/local"
-import { RootProvider } from "fumadocs-ui/provider/next"
 
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
@@ -75,7 +75,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
-      <body className="bg-background text-foreground min-h-screen antialiased">
+      <body className="min-h-screen bg-background text-foreground antialiased">
         <RootProvider
           search={{
             options: {

@@ -16,16 +16,16 @@ export function WindowChrome({
   return (
     <div
       className={cn(
-        "border-border bg-card overflow-hidden rounded-lg border",
+        "overflow-hidden rounded-lg border border-border bg-card",
         className,
       )}
     >
       {/* Title bar */}
-      <div className="border-border flex items-center gap-2 border-b px-3 py-2">
+      <div className="flex items-center gap-2 border-b border-border px-3 py-2">
         <span className="size-2 rounded-full bg-[#ff5f57]" />
         <span className="size-2 rounded-full bg-[#febc2e]" />
         <span className="size-2 rounded-full bg-[#28c840]" />
-        <span className="text-muted-foreground ml-1 font-mono text-[11px]">
+        <span className="ml-1 font-mono text-[11px] text-muted-foreground">
           {filename}
         </span>
       </div>
@@ -56,13 +56,13 @@ export function Connector({
   if (direction === "down") {
     return (
       <div className="flex justify-center py-4 md:hidden">
-        <ArrowDown className="text-terminal/30 size-4" />
+        <ArrowDown className="size-4 text-terminal/30" />
       </div>
     )
   }
   return (
     <div className="hidden items-center justify-center md:flex">
-      <ArrowRight className="text-terminal/30 size-5" />
+      <ArrowRight className="size-5 text-terminal/30" />
     </div>
   )
 }
@@ -76,11 +76,11 @@ export function StepLabel({
 }) {
   return (
     <div className="mb-3 flex items-center gap-3">
-      <span className="text-terminal font-mono text-xs font-bold">
+      <span className="font-mono text-xs font-bold text-terminal">
         {number}
       </span>
       <h3
-        className="text-foreground text-sm font-bold tracking-tight"
+        className="text-sm font-bold tracking-tight text-foreground"
         style={{ fontFamily: "var(--font-display)" }}
       >
         {title}
@@ -99,8 +99,8 @@ export function YamlLine({
   highlight?: boolean
 }) {
   return (
-    <div className={cn(highlight && "bg-terminal/8 -mx-2 rounded-sm px-2")}>
-      <span className="text-muted-foreground whitespace-pre">
+    <div className={cn(highlight && "-mx-2 rounded-sm bg-terminal/8 px-2")}>
+      <span className="whitespace-pre text-muted-foreground">
         {"  ".repeat(indent)}
       </span>
       {content}
@@ -117,5 +117,5 @@ export function YamlString({ v }: { v: string }) {
 }
 
 export function YamlPlaceholder({ v }: { v: string }) {
-  return <span className="text-terminal font-bold">{v}</span>
+  return <span className="font-bold text-terminal">{v}</span>
 }

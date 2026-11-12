@@ -133,13 +133,13 @@ export function TerminalAnimation() {
             <div key={entry.idx} className="flex items-start">
               {line.type === "command" ? (
                 <>
-                  <span className="text-terminal mr-2 shrink-0 select-none">
+                  <span className="mr-2 shrink-0 text-terminal select-none">
                     $
                   </span>
                   <span className="text-[#e0e0e0]">
                     {entry.typed}
                     {!entry.done && (
-                      <span className="cursor-blink bg-terminal ml-px inline-block h-[14px] w-[7px] align-middle" />
+                      <span className="cursor-blink ml-px inline-block h-[14px] w-[7px] bg-terminal align-middle" />
                     )}
                   </span>
                 </>
@@ -156,8 +156,8 @@ export function TerminalAnimation() {
         {/* Permanent blinking cursor after animation completes */}
         {finished && (
           <div className="flex items-start">
-            <span className="text-terminal mr-2 shrink-0">$</span>
-            <span className="cursor-blink bg-terminal inline-block h-[14px] w-[7px]" />
+            <span className="mr-2 shrink-0 text-terminal">$</span>
+            <span className="cursor-blink inline-block h-[14px] w-[7px] bg-terminal" />
           </div>
         )}
       </div>
