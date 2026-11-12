@@ -58,7 +58,7 @@ Triggers on pushes and pull requests touching `website/**` or the workflow, and 
 
 - **Theme**: `vitesse-dark` for BOTH light and dark mode (intentional, see `source.config.ts`). Do not introduce a separate light theme without product sign-off.
 - **Code blocks**: rehype-code processes them at build time — no client-side highlighter.
-- **Imports sorted by `@ianvs/prettier-plugin-sort-imports`** — let prettier own ordering; manual reordering will be reverted.
+- **Imports sorted by `@ianvs/prettier-plugin-sort-imports`** — let prettier own ordering; manual reordering will be reverted. `prettier.config.mjs` follows the workspace [Prettier configuration](https://git.guneet.dev/guneet/workspace/src/branch/main/decisions/prettier-configuration.md) decision.
 - **Tailwind v4**: utility classes only; styles live in `globals.css` via `@import "tailwindcss"`. No `tailwind.config.js` exists.
 - **`shadcn/ui`** components are auto-scaffolded into `src/components/ui/` — re-run `pnpm dlx shadcn@latest add <name>` instead of editing.
 

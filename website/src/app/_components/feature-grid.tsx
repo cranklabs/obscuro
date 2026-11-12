@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 
 import { useAnimateOnScroll } from "@/hooks/use-animate-on-scroll"
+
 import { GlowCard } from "./glow-card"
 
 const features = [
@@ -62,12 +63,12 @@ export function FeatureGrid() {
           style={{ animationDelay: `${i * 0.1}s` }}
         >
           <div className="mb-3 flex items-center gap-3">
-            <feature.icon className="text-muted-foreground group-hover:text-terminal size-5 transition-colors duration-300" />
-            <h3 className="text-foreground text-sm font-bold tracking-wide">
+            <feature.icon className="size-5 text-muted-foreground transition-colors duration-300 group-hover:text-terminal" />
+            <h3 className="text-sm font-bold tracking-wide text-foreground">
               {feature.title}
             </h3>
           </div>
-          <p className="text-muted-foreground text-xs/relaxed">
+          <p className="text-xs/relaxed text-muted-foreground">
             {feature.description}
           </p>
         </GlowCard>

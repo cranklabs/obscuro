@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation"
 import defaultMdxComponents from "fumadocs-ui/mdx"
 import {
   DocsBody,
@@ -6,6 +5,7 @@ import {
   DocsPage,
   DocsTitle,
 } from "fumadocs-ui/page"
+import { notFound } from "next/navigation"
 
 import { source } from "@/lib/source"
 
